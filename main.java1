@@ -1,0 +1,85 @@
+package tp1formes;
+
+public abstract class Forme implements Comparable<Forme> {
+    private String name;
+    private int color;
+    protected static int nbObj = 0;
+
+    public Forme(String name, int color) {
+        this.name = name;
+        this.color = color;
+        nbObj++;
+    }
+
+    public String getName() { return name; }
+    public int getColor() { return color; }
+    public static int getNbObj() { return nbObj; }
+
+    @Override
+    public String toString() {
+        return name + " (color:" + color + ")";
+    }
+
+    public abstract float surface();
+
+    @Override
+    public int compareTo(Forme other) {
+        return Float.compare(this.surface(), other.surface());
+    }
+}
+
+package tp1formes;
+
+public class NegativeDimensionException extends IllegalArgumentException {
+    public NegativeDimensionException(String msg) { super(msg); }
+}
+
+package tp1formes;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Vector;
+import java.util.Collections;
+
+public class Main {
+    public static void main(String[] args) {
+        Vector<Forme> vec = new Vector<>();
+        ArrayList<Forme> list = new ArrayList<>();
+        HashMap<String, Forme> index = new HashMap<>();
+
+        try {
+            Rect r1 = new Rect("R1", 0xFF0000, 10f, 5f);      // 50.0
+            Cercle c1 = new Cercle("C1", 0x00FF00, 7f);       // ~153.93803
+            Triangle t1 = new Triangle("T1", 0x0000FF, 8f, 5f); // 20.0
+
+            vec.add(r1); vec.add(c1); vec.add(t1);
+            list.addAll(vec);
+            index.put(r1.getName(), r1);
+            index.put(c1.getName(), c1);
+            index.put(t1.getName(), t1);
+        } catch (NegativeDimensionException e) {
+            System.err.println("Erreur dimensions: " + e.getMessage());
+            return;
+        }
+
+        float cumul = 0f;
+        for (Forme f : vec) {
+            System.out.println(f.getName() + " -> Surface : " + f.surface());
+            cumul += f.surface();
+        }
+
+        System.out.println("Nombre total d'objets : " + Forme.getNbObj());
+        System.out.println("Surface cumulée : " + cumul);
+
+        // exemple de tri (croissant) via Comparable
+        Collections.sort(list);
+        System.out.println("\nTri croissant par surface:");
+        for (Forme f : list) System.out.println(f.getName() + " : " + f.surface());
+
+        // recherche rapide via HashMap
+        String key = "C1";
+        Forme found = index.get(key);
+        if (found != null) System.out.println("\nRecherche " + key + " -> " + found + " surface=" + found.surface());
+        else System.out.println("\n" + key + " non trouvé dans l'index.");
+    }
+}
